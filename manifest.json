@@ -2,7 +2,7 @@
   "name": "Santa Tracker",
   "short_name": "Santa Tracker",
   "description": "Track Santa live on Christmas Eve!",
-  "start_url": "./santa-tracker-app.html",
+  "start_url": "./santa-tracker-v5-3.html",
   "display": "standalone",
   "background_color": "#4fc3f7",
   "theme_color": "#4fc3f7",
