@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎅 Santa Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Nunito:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#04060f;font-family:'Nunito',sans-serif}
+
+#page{
+  width:100%;height:100vh;
+  background:radial-gradient(ellipse at 50% 40%, #0d1f3c 0%, #04060f 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:18px;position:relative;overflow:hidden;
+}
+
+/* Stars */
+.star{position:absolute;background:white;border-radius:50%;animation:twk 2s ease infinite alternate}
+@keyframes twk{from{opacity:.1}to{opacity:.8}}
+
+/* Sleigh top */
+#sleigh{position:absolute;top:10%;white-space:nowrap;font-size:28px;animation:fly 5s linear forwards}
+@keyframes fly{from{right:-200px;opacity:0}10%{opacity:1}90%{opacity:1}to{right:110%;opacity:0}}
+
+/* Snow — very few very faint */
+.flake{position:absolute;top:-10px;color:rgba(255,255,255,.3);font-size:10px;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(105vh)}}
+
+/* Globe */
+#globe-canvas{border-radius:50%;display:block;border:2px solid rgba(80,160,255,.3);box-shadow:0 0 50px rgba(60,120,255,.4)}
+
+/* Santa orbit */
+#orbit-wrap{position:relative;display:inline-block}
+#orbit-ring{position:absolute;inset:-14px;border:1.5px dashed rgba(255,255,255,.18);border-radius:50%;animation:spin 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#orbit-santa{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:18px}
+
+/* Title */
+#pretitle{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.4);font-weight:700}
+#title{font-family:'Mountains of Christmas',cursive;font-size:clamp(44px,10vw,80px);color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,.6),0 3px 0 rgba(0,0,0,.4);line-height:1;text-align:center}
+
+/* Bar */
+#bar-outer{width:clamp(260px,60vw,440px);background:rgba(255,255,255,.1);border-radius:8px;height:14px;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+#bar-inner{height:100%;width:0%;border-radius:8px;background:linear-gradient(90deg,#e63946,#ffd700,#22c55e);box-shadow:0 0 12px rgba(255,215,0,.5);transition:none}
+#bar-msg{font-size:15px;font-weight:700;color:white;margin-top:6px;text-align:center;min-height:22px}
+
+/* Done button */
+#done-msg{display:none;flex-direction:column;align-items:center;gap:10px}
+#lets-go-btn{background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:99px;color:white;font-family:'Mountains of Christmas',cursive;font-size:clamp(22px,5vw,34px);font-weight:700;padding:16px 44px;cursor:pointer;box-shadow:0 0 30px rgba(34,197,94,.5),0 6px 20px rgba(0,0,0,.3);animation:pulse .6s ease infinite alternate;letter-spacing:.5px}
+#lets-go-btn:hover{filter:brightness(1.12);transform:scale(1.04)}
+#lets-go-btn:active{transform:scale(.97)}
+@keyframes pulse{from{box-shadow:0 0 20px rgba(34,197,94,.4)}to{box-shadow:0 0 40px rgba(34,197,94,.8),0 0 60px rgba(34,197,94,.3)}}
+</style>
+</head>
+<body>
+<div id="page">
+  <button onclick="this.style.display='none';document.getElementById('code-box').style.display='block'" style="position:absolute;top:10px;right:10px;z-index:999;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:rgba(255,255,255,.6);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer">📋 Embed Code</button>
+  <div id="code-box" style="display:none;position:absolute;top:10px;right:10px;z-index:999;background:#0a1428;border:1px solid rgba(255,215,0,.3);border-radius:10px;padding:12px;max-width:320px;font-size:11px">
+    <div style="color:#FFD700;font-weight:800;margin-bottom:6px">📋 Embed Code for Google Sites:</div>
+    <textarea id="embed-code" readonly style="width:100%;height:60px;background:#04060f;border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#4ade80;font-family:monospace;font-size:10px;padding:6px;resize:none">&lt;iframe src="PASTE_YOUR_LINK_HERE" width="100%" height="600px" frameborder="0"&gt;&lt;/iframe&gt;</textarea>
+    <button onclick="document.getElementById('embed-code').select();document.execCommand('copy');this.textContent='✅ Copied!'" style="width:100%;margin-top:6px;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);border-radius:6px;color:#FFD700;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;padding:5px;cursor:pointer">📋 Copy</button>
+    <button onclick="document.getElementById('code-box').style.display='none'" style="width:100%;margin-top:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:rgba(255,255,255,.5);font-family:'Nunito',sans-serif;font-size:11px;padding:4px;cursor:pointer">✕ Close</button>
+  </div>
+  <div id="sleigh">🦌🦌🦌🛷🎅</div>
+
+  <div id="orbit-wrap">
+    <canvas id="globe-canvas" width="200" height="200"></canvas>
+    <div id="orbit-ring"><div id="orbit-santa">🛷</div></div>
+  </div>
+
+  <div id="pretitle">The North Pole</div>
+  <div id="title">Santa Tracker</div>
+  <div id="bar-outer"><div id="bar-inner"></div></div>
+  <div id="bar-msg">Loading elves...</div>
+  <div id="done-msg">
+    <button id="lets-go-btn" onclick="window.location.href=TARGET">🎄 Let's Go! →</button>
+  </div>
+</div>
+
+<script>
+var TARGET = 'https://sites.google.com/view/tracksantac/home2';
+
+// Stars
+(function(){
+  var p=document.getElementById('page');
+  for(var i=0;i<70;i++){
+    var s=document.createElement('div');s.className='star';
+    var z=Math.random()*1.8+.3;
+    s.style.cssText='width:'+z+'px;height:'+z+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation-delay:'+Math.random()*2+'s;animation-duration:'+(1.5+Math.random()*2)+'s';
+    p.appendChild(s);
+  }
+})();
+
+// Snow flakes — very few
+(function(){
+  var p=document.getElementById('page');
+  for(var i=0;i<12;i++){
+    var f=document.createElement('div');f.className='flake';
+    f.textContent='❄';
+    f.style.cssText='left:'+Math.random()*100+'%;animation-duration:'+(8+Math.random()*6)+'s;animation-delay:'+Math.random()*8+'s;font-size:'+(7+Math.random()*7)+'px;opacity:'+(0.15+Math.random()*.2);
+    p.appendChild(f);
+  }
+})();
+
+// GLOBE — realistic Earth
+(function(){
+  var c=document.getElementById('globe-canvas');
+  var ctx=c.getContext('2d');
+  var S=200, cx=100, cy=100, r=96;
+  var rot=0;
+
+  var CONTS=[
+    {col:'#3d8c28',pts:[[70,-140],[65,-65],[55,-60],[45,-64],[40,-74],[35,-77],[30,-81],[25,-80],[20,-87],[15,-92],[15,-83],[20,-97],[25,-98],[35,-100],[45,-100],[52,-79],[60,-75],[65,-68],[70,-78],[72,-100],[70,-140]]},
+    {col:'#2e7a20',pts:[[12,-72],[5,-60],[0,-50],[-10,-37],[-20,-40],[-33,-53],[-52,-68],[-35,-48],[-5,-35],[5,-58],[14,-72]]},
+    {col:'#3d8c28',pts:[[70,28],[65,25],[58,18],[52,5],[48,0],[38,0],[37,-7],[40,-8],[50,0],[57,22],[62,28],[70,28]]},
+    {col:'#5a9a30',pts:[[37,10],[30,32],[8,46],[0,40],[-15,35],[-35,18],[-5,10],[8,0],[15,-16],[30,-10],[35,0],[37,10]]},
+    {col:'#468a2a',pts:[[70,140],[60,130],[35,120],[12,102],[5,102],[-2,108],[15,121],[35,120],[60,140],[70,140]]},
+    {col:'#608040',pts:[[42,45],[38,55],[20,57],[8,46],[5,38],[18,42],[30,32],[42,40],[42,45]]},
+    {col:'#508030',pts:[[28,72],[18,73],[8,77],[8,80],[20,85],[28,85],[30,80],[28,72]]},
+    {col:'#7a6030',pts:[[-15,130],[-20,148],[-33,152],[-38,140],[-25,122],[-15,130]]},
+  ];
+
+  function pr(lat,lng){
+    var phi=(90-lat)*Math.PI/180, th=(lng+180)*Math.PI/180+rot;
+    var x=r*Math.sin(phi)*Math.cos(th), y=r*Math.cos(phi), z=r*Math.sin(phi)*Math.sin(th);
+    return{x:cx+x, y:cy-y, v:z>-r*.05};
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,S,S);
+    // Ocean
+    var og=ctx.createRadialGradient(cx-r*.3,cy-r*.3,r*.05,cx,cy,r);
+    og.addColorStop(0,'#3a90d4');
+    og.addColorStop(.5,'#1e5ca8');
+    og.addColorStop(1,'#0a2860');
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=og;ctx.fill();
+
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
+
+    // Continents
+    CONTS.forEach(function(c2){
+      var pts=c2.pts.map(function(p){return pr(p[0],p[1]);});
+      var vis=pts.filter(function(p){return p.v;});
+      if(vis.length<2)return;
+      ctx.beginPath();var st=false;
+      pts.forEach(function(p){if(p.v){st?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);st=true;}});
+      ctx.closePath();ctx.fillStyle=c2.col;ctx.fill();
+    });
+
+    // Ice cap
+    var ice=[];for(var i=0;i<360;i+=6)ice.push([83,i-180]);
+    var ip=ice.map(function(p){return pr(p[0],p[1]);}).filter(function(p){return p.v;});
+    if(ip.length>2){ctx.beginPath();ip.forEach(function(p,i){i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);});ctx.closePath();ctx.fillStyle='rgba(220,240,255,.95)';ctx.fill();}
+
+    // Shine
+    var sh=ctx.createRadialGradient(cx-r*.35,cy-r*.35,0,cx,cy,r);
+    sh.addColorStop(0,'rgba(255,255,255,.18)');sh.addColorStop(.5,'rgba(255,255,255,.03)');sh.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=sh;ctx.fill();
+
+    ctx.restore();
+
+    // Atmosphere glow
+    var at=ctx.createRadialGradient(cx,cy,r*.9,cx,cy,r*1.1);
+    at.addColorStop(0,'rgba(80,150,255,.22)');at.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(cx,cy,r*1.1,0,Math.PI*2);ctx.fillStyle=at;ctx.fill();
+
+    rot+=0.01;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// LOADING BAR — 4 seconds exactly using setInterval
+var MSGS=[
+  'Loading elves...',
+  'Charging Rudolph\'s nose... 🔴',
+  'Polishing the sleigh... 🛷',
+  'Counting the presents... 🎁',
+  'Warming up the reindeer... 🦌',
+  'Checking the naughty list... 📋',
+  'Plotting Santa\'s route... 🗺️',
+  'Almost ready for takeoff... 🚀',
+];
+
+var bar=document.getElementById('bar-inner');
+var msg=document.getElementById('bar-msg');
+var doneMsg=document.getElementById('done-msg');
+var pct=0;
+var TOTAL_MS=4000;
+var TICK=40;
+var inc=100/(TOTAL_MS/TICK);
+
+var iv=setInterval(function(){
+  pct+=inc;
+  if(pct>100)pct=100;
+  bar.style.width=pct.toFixed(1)+'%';
+  var idx=Math.min(Math.floor(pct/100*MSGS.length),MSGS.length-1);
+  msg.textContent=MSGS[idx];
+
+  if(pct>=100){
+    clearInterval(iv);
+    msg.style.display='none';
+    doneMsg.style.display='block';
+  }
+},TICK);
+</script>
+</body>
+</html>
